@@ -9,6 +9,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField 'String', 'X_IBM_CLIENT_ID', TokenCaseStudy_X_IBM_CLIENT_ID
+        buildConfigField 'String', 'X_IBM_CLIENT_SECRET', TokenCaseStudy_X_IBM_CLIENT_SECRET
+        buildConfigField 'String', 'CAMPAIGN_QR_API_URL', '"https://sandbox-api.payosy.com/api/"'
     }
     buildTypes {
         release {
@@ -19,11 +23,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'eu.the4thfloor.volley:com.android.volley:2015.05.28'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
 }
