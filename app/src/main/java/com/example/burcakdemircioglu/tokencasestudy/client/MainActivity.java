@@ -23,12 +23,16 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.concurrent.ExecutionException;
 
+import static com.example.burcakdemircioglu.tokencasestudy.model.QR.RECEIPT_DATETIME_TAG;
+import static com.example.burcakdemircioglu.tokencasestudy.model.QR.TRANSACTION_AMOUNT_TAG;
+import static com.example.burcakdemircioglu.tokencasestudy.model.QR.TRANSACTION_CURRENCY_TAG;
+import static com.example.burcakdemircioglu.tokencasestudy.model.QR.getCurrencyString;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextViewResult;
     private View buttonPay;
     private View thick;
-    private String qrString;
     private QR qr;
 
     @Override
@@ -58,27 +62,23 @@ public class MainActivity extends AppCompatActivity {
                     String response = stringResponseEntity.getBody();
                     try {
                         JSONObject jsonCell = new JSONObject(response);
-                        qrString = jsonCell.getString("QRdata");
-                        qr = QR.parseQR(qrString);
+                        String qrString = jsonCell.getString("QRdata");
+                        qr = new QR(qrString);
+                        qr.qrString = qrString;
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    String currency = qr.tagsToValues.get("53");
-                    if (currency.equals("949")) {
-                        currency = "TRY";
-                    }
-                    StringBuilder stringBuilder = new StringBuilder()
-                            .append("Date: ")
-                            .append(qr.tagsToValues.get("82") + "\n")
-                            .append("Payment amount: ")
-                            .append(qr.tagsToValues.get("54"))
-                            .append(" " + currency);
-                    mTextViewResult.setText(stringBuilder.toString());
+                    String stringBuilder = "Date: " +
+                            qr.tagsToValues.get(RECEIPT_DATETIME_TAG) + "\n" +
+                            "Payment amount: " +
+                            qr.tagsToValues.get(TRANSACTION_AMOUNT_TAG) +
+                            " " + getCurrencyString(qr.tagsToValues.get(TRANSACTION_CURRENCY_TAG));
+                    mTextViewResult.setText(stringBuilder);
                     buttonPay.setVisibility(View.VISIBLE);
                 } else {
-                    mTextViewResult.setText("There is an error in the system. Please try again.");
+                    mTextViewResult.setText(R.string.qr_error);
                 }
             }
         });
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     public void requestPayment(View v) throws ExecutionException, InterruptedException {
         thick.setVisibility(View.INVISIBLE);
 
-        final ResponseEntity<String> stringResponseEntity = new PaymentRESTTask(qrString, qr).execute().get();
+        final ResponseEntity<String> stringResponseEntity = new PaymentRESTTask(qr).execute().get();
 
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
@@ -95,14 +95,13 @@ public class MainActivity extends AppCompatActivity {
 
                 if (stringResponseEntity != null) {
 
-                    String response = stringResponseEntity.getBody();
                     HttpStatus statusCode = stringResponseEntity.getStatusCode();
                     if (statusCode == HttpStatus.OK) {
                         thick.setVisibility(View.VISIBLE);
-                        mTextViewResult.setText("Payment is done successfully!");
+                        mTextViewResult.setText(R.string.payment_success);
                         buttonPay.setVisibility(View.INVISIBLE);
                     } else {
-                        mTextViewResult.setText("There is an error in the system. The payment is not completed! Please try again.");
+                        mTextViewResult.setText(R.string.payment_error);
                     }
                 }
             }
