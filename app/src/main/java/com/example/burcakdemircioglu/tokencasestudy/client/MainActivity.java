@@ -1,4 +1,4 @@
-package com.example.burcakdemircioglu.tokencasestudy;
+package com.example.burcakdemircioglu.tokencasestudy.client;
 
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -8,7 +8,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.TextView;
+
+import com.example.burcakdemircioglu.tokencasestudy.R;
+import com.example.burcakdemircioglu.tokencasestudy.model.QR;
+import com.example.burcakdemircioglu.tokencasestudy.server.PaymentRESTTask;
+import com.example.burcakdemircioglu.tokencasestudy.server.RequestQRRESTTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,21 +27,26 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextViewResult;
     private View buttonPay;
+    private View thick;
     private String qrString;
     private QR qr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         mTextViewResult = findViewById(R.id.text_view_result);
         buttonPay = findViewById(R.id.buttonPay);
         buttonPay.setVisibility(View.INVISIBLE);
+        thick = findViewById(R.id.thick);
+        thick.setVisibility(View.INVISIBLE);
         setSupportActionBar(toolbar);
     }
 
     public void requestQR(View v) throws ExecutionException, InterruptedException {
+        thick.setVisibility(View.INVISIBLE);
 
         final ResponseEntity<String> stringResponseEntity = new RequestQRRESTTask().execute().get();
 
@@ -66,13 +77,16 @@ public class MainActivity extends AppCompatActivity {
                             .append(" " + currency);
                     mTextViewResult.setText(stringBuilder.toString());
                     buttonPay.setVisibility(View.VISIBLE);
+                } else {
+                    mTextViewResult.setText("There is an error in the system. Please try again.");
                 }
             }
         });
     }
 
-
     public void requestPayment(View v) throws ExecutionException, InterruptedException {
+        thick.setVisibility(View.INVISIBLE);
+
         final ResponseEntity<String> stringResponseEntity = new PaymentRESTTask(qrString, qr).execute().get();
 
         MainActivity.this.runOnUiThread(new Runnable() {
@@ -84,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
                     String response = stringResponseEntity.getBody();
                     HttpStatus statusCode = stringResponseEntity.getStatusCode();
                     if (statusCode == HttpStatus.OK) {
+                        thick.setVisibility(View.VISIBLE);
                         mTextViewResult.setText("Payment is done successfully!");
                         buttonPay.setVisibility(View.INVISIBLE);
                     } else {
@@ -106,23 +121,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 }

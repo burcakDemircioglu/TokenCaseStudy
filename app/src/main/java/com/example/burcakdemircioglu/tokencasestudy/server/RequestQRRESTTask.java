@@ -1,6 +1,8 @@
-package com.example.burcakdemircioglu.tokencasestudy;
+package com.example.burcakdemircioglu.tokencasestudy.server;
 
 import android.os.AsyncTask;
+
+import com.example.burcakdemircioglu.tokencasestudy.BuildConfig;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,21 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public class PaymentRESTTask extends AsyncTask<String, Void, ResponseEntity<String>> {
-
-    private String qrString;
-    private QR qr;
-
-    public PaymentRESTTask(String qrString, QR qr) {
-        this.qrString = qrString;
-        this.qr = qr;
-    }
+public class RequestQRRESTTask extends AsyncTask<String, Void, ResponseEntity<String>> {
 
     @Override
     protected ResponseEntity<String> doInBackground(String... strings) {
@@ -39,19 +29,9 @@ public class PaymentRESTTask extends AsyncTask<String, Void, ResponseEntity<Stri
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             headers.set("x-ibm-client-id", BuildConfig.X_IBM_CLIENT_ID);
             headers.set("x-ibm-client-secret", BuildConfig.X_IBM_CLIENT_SECRET);
-            String input = "{\"returnCode\":1000," +
-                    "\"returnDesc\":\"success\"," +
-                    "\"receiptMsgCustomer\":\"beko Campaign\"," +
-                    "\"receiptMsgMerchant\":\"beko Campaign Merchant\"," +
-                    "\"paymentInfoList\":[{\"paymentProcessorID\":67," +
-                    "                       \"paymentActionList\":[{\"paymentType\":3, " +
-                    "                                               \"amount\":" + qr.tagsToValues.get("54") + "," +
-                    "                                               \"currencyID\":" + qr.tagsToValues.get("53") + "," +
-                    "                                               \"vatRate\":" + qr.tagsToValues.get("86").split("-")[0] + "}]}]," +
-                    "\"QRdata\":\"" + qrString + "\"}";
-
+            String input = "{\"totalReceiptAmount\":100}";
             HttpEntity<String> entity = new HttpEntity<>(input, headers);
-            String url = BuildConfig.CAMPAIGN_QR_API_URL + "payment";
+            String url = BuildConfig.CAMPAIGN_QR_API_URL + "get_qr_sale";
 
             ResponseEntity<String> responseEntity = restTemplate.exchange(
                     url,

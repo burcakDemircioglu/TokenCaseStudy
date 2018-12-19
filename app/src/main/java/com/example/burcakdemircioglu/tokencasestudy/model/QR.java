@@ -1,4 +1,4 @@
-package com.example.burcakdemircioglu.tokencasestudy;
+package com.example.burcakdemircioglu.tokencasestudy.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class QR {
 
-    Map<String, String> tagsToValues = new HashMap<>();
+    public Map<String, String> tagsToValues = new HashMap<>();
 
     public QR() {
         tagsToValues.put("00", "");
