@@ -12,8 +12,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RequestQRRESTTask extends AsyncTask<String, Void, ResponseEntity<String>> {
 

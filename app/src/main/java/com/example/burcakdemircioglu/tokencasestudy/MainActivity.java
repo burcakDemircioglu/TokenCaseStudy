@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.concurrent.ExecutionException;
@@ -19,7 +20,9 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextViewResult;
-    private String qr;
+    private View buttonPay;
+    private String qrString;
+    private QR qr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +30,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         mTextViewResult = findViewById(R.id.text_view_result);
+        buttonPay = findViewById(R.id.buttonPay);
+        buttonPay.setVisibility(View.INVISIBLE);
         setSupportActionBar(toolbar);
-
     }
 
     public void requestQR(View v) throws ExecutionException, InterruptedException {
+
         final ResponseEntity<String> stringResponseEntity = new RequestQRRESTTask().execute().get();
 
         MainActivity.this.runOnUiThread(new Runnable() {
@@ -40,29 +45,50 @@ public class MainActivity extends AppCompatActivity {
 
                 if (stringResponseEntity != null) {
                     String response = stringResponseEntity.getBody();
-                    mTextViewResult.setText(response);
                     try {
                         JSONObject jsonCell = new JSONObject(response);
-                        qr = jsonCell.getString("QRdata");
+                        qrString = jsonCell.getString("QRdata");
+                        qr = QR.parseQR(qrString);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+
+                    String currency = qr.tagsToValues.get("53");
+                    if (currency.equals("949")) {
+                        currency = "TRY";
+                    }
+                    StringBuilder stringBuilder = new StringBuilder()
+                            .append("Date: ")
+                            .append(qr.tagsToValues.get("82") + "\n")
+                            .append("Payment amount: ")
+                            .append(qr.tagsToValues.get("54"))
+                            .append(" " + currency);
+                    mTextViewResult.setText(stringBuilder.toString());
+                    buttonPay.setVisibility(View.VISIBLE);
                 }
             }
         });
     }
 
+
     public void requestPayment(View v) throws ExecutionException, InterruptedException {
-        final ResponseEntity<String> stringResponseEntity = new PaymentRESTTask(qr).execute().get();
+        final ResponseEntity<String> stringResponseEntity = new PaymentRESTTask(qrString, qr).execute().get();
 
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
                 if (stringResponseEntity != null) {
+
                     String response = stringResponseEntity.getBody();
-                    mTextViewResult.setText(response);
+                    HttpStatus statusCode = stringResponseEntity.getStatusCode();
+                    if (statusCode == HttpStatus.OK) {
+                        mTextViewResult.setText("Payment is done successfully!");
+                        buttonPay.setVisibility(View.INVISIBLE);
+                    } else {
+                        mTextViewResult.setText("There is an error in the system. The payment is not completed! Please try again.");
+                    }
                 }
             }
         });
