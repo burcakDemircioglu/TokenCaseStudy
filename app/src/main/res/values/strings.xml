@@ -1,12 +1,9 @@
 <resources>
     <string name="app_name">TokenCaseStudy</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="welcome">Welcome To 1000TR Payment!</string>
     <string name="payment_success">Payment is done successfully!</string>
     <string name="payment_error">There is an error in the system. The payment is not completed! Please try again.</string>
     <string name="qr_error">There is an error in the system. Please try again.</string>
+    <string name="pay_button">Pay</string>
+    <string name="get_payment_info_button">Get Payment Info</string>
 </resources>
