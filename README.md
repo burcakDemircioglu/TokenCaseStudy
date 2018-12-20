@@ -1,4 +1,13 @@
 # TokenCaseStudy
+### To Run
+
+You can run the project with Android Studio but in the build.gradle you have to change:
+* "TokenCaseStudy_X_IBM_CLIENT_ID"
+* "TokenCaseStudy_X_IBM_CLIENT_SECRET"
+
+beforehand with your own authentication of the API.
+
+### Explanation
 This simple android app is done as mini showcase of the Campaign QR(1.03) API's Payment Domain.
 https://sandbox-developer.payosy.com/node/180
 
