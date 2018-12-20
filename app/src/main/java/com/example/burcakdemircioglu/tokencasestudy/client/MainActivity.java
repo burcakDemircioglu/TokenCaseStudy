@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTextViewResult;
     private View buttonPay;
     private View thick;
+    private View progressBar;
+    private View buttonGetInfo;
     private QR qr;
 
     @Override
@@ -46,17 +48,26 @@ public class MainActivity extends AppCompatActivity {
         buttonPay.setVisibility(View.INVISIBLE);
         thick = findViewById(R.id.thick);
         thick.setVisibility(View.INVISIBLE);
+        progressBar = findViewById(R.id.progressBar_cyclic);
+
+        buttonGetInfo = findViewById(R.id.buttonGetInfo);
+        progressBar.setVisibility(View.INVISIBLE);
+
         setSupportActionBar(toolbar);
     }
 
     public void requestQR(View v) throws ExecutionException, InterruptedException {
         thick.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        buttonGetInfo.setEnabled(false);
 
         final ResponseEntity<String> stringResponseEntity = new RequestQRRESTTask().execute().get();
 
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                progressBar.setVisibility(View.INVISIBLE);
 
                 if (stringResponseEntity != null) {
                     String response = stringResponseEntity.getBody();
@@ -77,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
                             " " + getCurrencyString(qr.tagsToValues.get(TRANSACTION_CURRENCY_TAG));
                     mTextViewResult.setText(stringBuilder);
                     buttonPay.setVisibility(View.VISIBLE);
+                    buttonPay.setEnabled(true);
                 } else {
                     mTextViewResult.setText(R.string.qr_error);
                 }
@@ -86,13 +98,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void requestPayment(View v) throws ExecutionException, InterruptedException {
         thick.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        buttonPay.setEnabled(false);
 
         final ResponseEntity<String> stringResponseEntity = new PaymentRESTTask(qr).execute().get();
 
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                progressBar.setVisibility(View.INVISIBLE);
 
+                buttonGetInfo.setEnabled(true);
                 if (stringResponseEntity != null) {
 
                     HttpStatus statusCode = stringResponseEntity.getStatusCode();
@@ -100,8 +116,12 @@ public class MainActivity extends AppCompatActivity {
                         thick.setVisibility(View.VISIBLE);
                         mTextViewResult.setText(R.string.payment_success);
                         buttonPay.setVisibility(View.INVISIBLE);
+                        buttonGetInfo.setEnabled(true);
+
                     } else {
+                        buttonPay.setEnabled(true);
                         mTextViewResult.setText(R.string.payment_error);
+                        buttonGetInfo.setEnabled(true);
                     }
                 }
             }
